@@ -16,6 +16,20 @@ max-cheat-stack-size: 64
 # This enables support for modded items when using hybrid server setups
 allow-custom-items: true
 
+# Rate limiting to prevent spam/abuse
+rate-limiting:
+  # Enable rate limiting
+  enabled: true
+  
+  # Cooldown period in seconds
+  cooldown-seconds: 10
+  
+  # Maximum item give actions per cooldown period
+  max-actions: 20
+  
+  # Bypass permission (players with this can bypass rate limits)
+  bypass-permission: 'emijeipb.bypass-ratelimit'
+
 # Protocol settings for EMI/JEI communication
 protocol:
   # Enable custom plugin messaging channels
@@ -33,6 +47,9 @@ logging:
   
   # Log protocol messages
   log-protocol-messages: false
+  
+  # Log rate limit violations
+  log-rate-limits: true
 
 # Item restrictions
 restrictions:

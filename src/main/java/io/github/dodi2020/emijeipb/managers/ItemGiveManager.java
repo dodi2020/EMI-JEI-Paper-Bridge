@@ -4,6 +4,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import io.github.dodi2020.emijeipb.EMIJEIPaperBridge;
 import io.github.dodi2020.emijeipb.events.EMIJEIGiveItemEvent;
+import io.github.dodi2020.emijeipb.util.RateLimiter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,10 +20,16 @@ public class ItemGiveManager {
     
     private final EMIJEIPaperBridge plugin;
     private final ConfigManager configManager;
+    private final RateLimiter rateLimiter;
     
     public ItemGiveManager(EMIJEIPaperBridge plugin) {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
+        
+        // Initialize rate limiter with config values
+        long cooldownMs = configManager.getRateLimitCooldownSeconds() * 1000L;
+        int maxActions = configManager.getRateLimitMaxActions();
+        this.rateLimiter = new RateLimiter(cooldownMs, maxActions);
     }
     
     /**
@@ -44,6 +51,22 @@ public class ItemGiveManager {
         if (!player.hasPermission("emijeipb.cheat") && !player.hasPermission("emijeipb.give")) {
             player.sendMessage("§cYou don't have permission to use cheat mode!");
             return false;
+        }
+        
+        // Check rate limiting (unless player has bypass permission)
+        if (configManager.isRateLimitingEnabled() && 
+            !player.hasPermission(configManager.getRateLimitBypassPermission())) {
+            
+            if (!rateLimiter.allowAction(player)) {
+                int remainingSeconds = rateLimiter.getRemainingCooldown(player);
+                player.sendMessage("§cYou're doing that too fast! Wait " + remainingSeconds + " seconds.");
+                
+                if (configManager.isLogRateLimits()) {
+                    plugin.getLogger().warning(String.format("Rate limit hit for %s (remaining: %ds)", 
+                        player.getName(), remainingSeconds));
+                }
+                return false;
+            }
         }
         
         // Check if item is blacklisted

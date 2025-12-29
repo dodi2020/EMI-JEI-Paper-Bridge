@@ -26,6 +26,7 @@ permissions:
       emijeipb.give.others: true
       emijeipb.reload: true
       emijeipb.cheat: true
+      emijeipb.bypass-ratelimit: true
   emijeipb.give:
     description: Allows giving items to yourself via EMI/JEI
     default: op
@@ -34,6 +35,9 @@ permissions:
     default: op
   emijeipb.cheat:
     description: Allows using cheat mode features from EMI/JEI
+    default: op
+  emijeipb.bypass-ratelimit:
+    description: Allows bypassing rate limits for item giving
     default: op
   emijeipb.reload:
     description: Allows reloading the plugin configuration

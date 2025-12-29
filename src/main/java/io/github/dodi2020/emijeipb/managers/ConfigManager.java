@@ -25,8 +25,13 @@ public class ConfigManager {
     private String jeiChannel;
     private boolean logItemGives;
     private boolean logProtocolMessages;
+    private boolean logRateLimits;
     private List<String> blacklistedItems;
     private Map<String, String> restrictedItems;
+    private boolean rateLimitingEnabled;
+    private int rateLimitCooldownSeconds;
+    private int rateLimitMaxActions;
+    private String rateLimitBypassPermission;
     
     public ConfigManager(EMIJEIPaperBridge plugin) {
         this.plugin = plugin;
@@ -52,6 +57,13 @@ public class ConfigManager {
         // Logging settings
         logItemGives = config.getBoolean("logging.log-item-gives", true);
         logProtocolMessages = config.getBoolean("logging.log-protocol-messages", false);
+        logRateLimits = config.getBoolean("logging.log-rate-limits", true);
+        
+        // Rate limiting settings
+        rateLimitingEnabled = config.getBoolean("rate-limiting.enabled", true);
+        rateLimitCooldownSeconds = config.getInt("rate-limiting.cooldown-seconds", 10);
+        rateLimitMaxActions = config.getInt("rate-limiting.max-actions", 20);
+        rateLimitBypassPermission = config.getString("rate-limiting.bypass-permission", "emijeipb.bypass-ratelimit");
         
         // Load restrictions
         blacklistedItems = config.getStringList("restrictions.blacklisted-items");
@@ -107,6 +119,26 @@ public class ConfigManager {
     
     public boolean isLogProtocolMessages() {
         return logProtocolMessages;
+    }
+    
+    public boolean isLogRateLimits() {
+        return logRateLimits;
+    }
+    
+    public boolean isRateLimitingEnabled() {
+        return rateLimitingEnabled;
+    }
+    
+    public int getRateLimitCooldownSeconds() {
+        return rateLimitCooldownSeconds;
+    }
+    
+    public int getRateLimitMaxActions() {
+        return rateLimitMaxActions;
+    }
+    
+    public String getRateLimitBypassPermission() {
+        return rateLimitBypassPermission;
     }
     
     public List<String> getBlacklistedItems() {
