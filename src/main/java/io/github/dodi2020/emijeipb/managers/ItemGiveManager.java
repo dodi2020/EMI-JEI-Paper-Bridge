@@ -3,6 +3,7 @@ package io.github.dodi2020.emijeipb.managers;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import io.github.dodi2020.emijeipb.EMIJEIPaperBridge;
+import io.github.dodi2020.emijeipb.events.EMIJEIGiveItemEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -31,9 +32,10 @@ public class ItemGiveManager {
      * @param itemId The Minecraft item ID (e.g., "minecraft:diamond")
      * @param amount The amount of items to give
      * @param nbt Optional NBT data for the item
+     * @param source The source of the give item request
      * @return true if the item was given successfully
      */
-    public boolean giveItem(Player player, String itemId, int amount, String nbt) {
+    public boolean giveItem(Player player, String itemId, int amount, String nbt, EMIJEIGiveItemEvent.Source source) {
         if (!configManager.isAllowCheatMode()) {
             return false;
         }
@@ -65,20 +67,40 @@ public class ItemGiveManager {
             amount = maxStackSize;
         }
         
+        // Fire the event
+        EMIJEIGiveItemEvent event = new EMIJEIGiveItemEvent(player, itemId, amount, nbt, source);
+        Bukkit.getPluginManager().callEvent(event);
+        
+        // Check if the event was cancelled
+        if (event.isCancelled()) {
+            return false;
+        }
+        
+        // Update values from event (in case they were modified)
+        amount = event.getAmount();
+        nbt = event.getNbt();
+        
         try {
-            // Parse the item ID to get Material
-            Material material = parseMaterial(itemId);
-            if (material == null || material == Material.AIR) {
-                player.sendMessage("§cInvalid item: " + itemId);
-                return false;
-            }
+            ItemStack itemStack;
             
-            // Create the item stack
-            ItemStack itemStack = new ItemStack(material, amount);
-            
-            // Apply NBT data if provided
-            if (nbt != null && !nbt.isEmpty()) {
-                applyNBT(itemStack, nbt);
+            // Check if event provided a custom ItemStack
+            if (event.getResultItem() != null) {
+                itemStack = event.getResultItem();
+            } else {
+                // Parse the item ID to get Material
+                Material material = parseMaterial(itemId);
+                if (material == null || material == Material.AIR) {
+                    player.sendMessage("§cInvalid item: " + itemId);
+                    return false;
+                }
+                
+                // Create the item stack
+                itemStack = new ItemStack(material, amount);
+                
+                // Apply NBT data if provided
+                if (nbt != null && !nbt.isEmpty()) {
+                    applyNBT(itemStack, nbt);
+                }
             }
             
             // Give the item to the player
@@ -86,7 +108,7 @@ public class ItemGiveManager {
             
             // Log if enabled
             if (configManager.isLogItemGives()) {
-                plugin.getLogger().info(String.format("Gave %d x %s to %s", amount, itemId, player.getName()));
+                plugin.getLogger().info(String.format("Gave %d x %s to %s (source: %s)", amount, itemId, player.getName(), source));
             }
             
             return true;
@@ -96,6 +118,19 @@ public class ItemGiveManager {
             player.sendMessage("§cFailed to give item: " + e.getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Give an item to a player (convenience method with UNKNOWN source)
+     * 
+     * @param player The player to give the item to
+     * @param itemId The Minecraft item ID (e.g., "minecraft:diamond")
+     * @param amount The amount of items to give
+     * @param nbt Optional NBT data for the item
+     * @return true if the item was given successfully
+     */
+    public boolean giveItem(Player player, String itemId, int amount, String nbt) {
+        return giveItem(player, itemId, amount, nbt, EMIJEIGiveItemEvent.Source.UNKNOWN);
     }
     
     /**
@@ -175,6 +210,14 @@ public class ItemGiveManager {
      * This is used when EMI/JEI sends a request via plugin channels
      */
     public void handlePluginMessage(Player player, byte[] message) {
+        handlePluginMessageWithSource(player, message, EMIJEIGiveItemEvent.Source.UNKNOWN);
+    }
+    
+    /**
+     * Handle a plugin message for item giving with a specific source
+     * This is used when EMI/JEI sends a request via plugin channels
+     */
+    public void handlePluginMessageWithSource(Player player, byte[] message, EMIJEIGiveItemEvent.Source source) {
         try {
             ByteArrayDataInput input = ByteStreams.newDataInput(message);
             
@@ -188,7 +231,7 @@ public class ItemGiveManager {
             switch (action) {
                 case "GiveItem":
                 case "CheatItem":
-                    handleGiveItemMessage(player, input);
+                    handleGiveItemMessage(player, input, source);
                     break;
                 case "RequestCheatPermission":
                     handleCheatPermissionRequest(player);
@@ -209,7 +252,7 @@ public class ItemGiveManager {
     /**
      * Handle a give item message from the client
      */
-    private void handleGiveItemMessage(Player player, ByteArrayDataInput input) {
+    private void handleGiveItemMessage(Player player, ByteArrayDataInput input, EMIJEIGiveItemEvent.Source source) {
         try {
             String itemId = input.readUTF();
             int amount = input.readInt();
@@ -222,7 +265,7 @@ public class ItemGiveManager {
                 // No NBT data
             }
             
-            giveItem(player, itemId, amount, nbt);
+            giveItem(player, itemId, amount, nbt, source);
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "Failed to parse give item message", e);
         }

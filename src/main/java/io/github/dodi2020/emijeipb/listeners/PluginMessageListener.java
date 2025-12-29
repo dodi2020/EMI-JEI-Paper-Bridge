@@ -63,7 +63,8 @@ public class PluginMessageListener implements Listener, PluginMessageListener {
         
         // EMI typically uses vanilla /give commands, but we can handle
         // custom protocol messages if EMI sends them
-        itemGiveManager.handlePluginMessage(player, message);
+        itemGiveManager.handlePluginMessageWithSource(player, message, 
+            io.github.dodi2020.emijeipb.events.EMIJEIGiveItemEvent.Source.EMI);
     }
     
     /**
@@ -76,7 +77,8 @@ public class PluginMessageListener implements Listener, PluginMessageListener {
         }
         
         // Process the JEI protocol message
-        itemGiveManager.handlePluginMessage(player, message);
+        itemGiveManager.handlePluginMessageWithSource(player, message, 
+            io.github.dodi2020.emijeipb.events.EMIJEIGiveItemEvent.Source.JEI);
     }
     
     /**

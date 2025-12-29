@@ -100,7 +100,8 @@ public class EMIItemCommand implements CommandExecutor, TabCompleter {
         }
         
         // Give the item
-        boolean success = itemGiveManager.giveItem(targetPlayer, itemId, amount, nbt);
+        boolean success = itemGiveManager.giveItem(targetPlayer, itemId, amount, nbt, 
+            io.github.dodi2020.emijeipb.events.EMIJEIGiveItemEvent.Source.COMMAND);
         
         if (success) {
             if (targetPlayer.equals(sender)) {
