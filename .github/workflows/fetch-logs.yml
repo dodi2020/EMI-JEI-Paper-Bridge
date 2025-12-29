@@ -1,0 +1,29 @@
+name: Fetch mclo.gs Logs
+
+on:
+  workflow_dispatch:
+    inputs:
+      log_id:
+        description: 'mclo.gs log ID (e.g., BSeuv28)'
+        required: true
+        type: string
+
+jobs:
+  fetch-log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch log from mclo.gs
+        run: |
+          echo "Fetching log from mclo.gs/${{ github.event.inputs.log_id }}"
+          curl -L "https://api.mclo.gs/1/raw/${{ github.event.inputs.log_id }}" > log_output.txt
+          
+      - name: Display log content
+        run: |
+          echo "=== Log Content ==="
+          cat log_output.txt
+          
+      - name: Upload log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mclo-gs-log-${{ github.event.inputs.log_id }}
+          path: log_output.txt

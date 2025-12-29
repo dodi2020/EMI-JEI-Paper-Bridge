@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'io.github.dodi2020'
+version = '1.0.0'
+description = 'Paper plugin to bridge EMI/JEI client mods with server functionality'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'papermc'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    archiveFileName.set("${project.name}-${project.version}.jar")
+}
+
+build {
+    dependsOn shadowJar
+}

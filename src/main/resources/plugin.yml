@@ -1,0 +1,44 @@
+name: EMI-JEI-Paper-Bridge
+version: '1.0.0'
+main: io.github.dodi2020.emijeipb.EMIJEIPaperBridge
+api-version: '1.21'
+description: Paper plugin to bridge EMI/JEI client mods with server functionality
+author: dodi2020
+website: https://github.com/dodi2020/EMI-JEI-Paper-Bridge
+
+commands:
+  emiitem:
+    description: Give items from EMI/JEI interface
+    usage: /<command> <player> <item> [amount] [nbt]
+    permission: emijeipb.give
+    aliases: [jeiitem, giveitem]
+  emireload:
+    description: Reload EMI-JEI-Paper-Bridge configuration
+    usage: /<command>
+    permission: emijeipb.reload
+    aliases: [jeireload]
+
+permissions:
+  emijeipb.*:
+    description: Grants all EMI-JEI-Paper-Bridge permissions
+    children:
+      emijeipb.give: true
+      emijeipb.give.others: true
+      emijeipb.reload: true
+      emijeipb.cheat: true
+      emijeipb.bypass-ratelimit: true
+  emijeipb.give:
+    description: Allows giving items to yourself via EMI/JEI
+    default: op
+  emijeipb.give.others:
+    description: Allows giving items to other players via EMI/JEI
+    default: op
+  emijeipb.cheat:
+    description: Allows using cheat mode features from EMI/JEI
+    default: op
+  emijeipb.bypass-ratelimit:
+    description: Allows bypassing rate limits for item giving
+    default: op
+  emijeipb.reload:
+    description: Allows reloading the plugin configuration
+    default: op

@@ -1,0 +1,69 @@
+# EMI-JEI-Paper-Bridge Configuration
+# This plugin bridges EMI/JEI client mods with Paper server functionality
+
+# Enable debug logging
+debug: false
+
+# Allow players to cheat items from EMI/JEI
+# Requires players to have the emijeipb.cheat permission
+allow-cheat-mode: true
+
+# Maximum stack size for items given via cheat mode
+# Set to -1 for no limit (uses vanilla max stack size)
+max-cheat-stack-size: 64
+
+# Allow custom items from mods
+# This enables support for modded items when using hybrid server setups
+allow-custom-items: true
+
+# Rate limiting to prevent spam/abuse
+rate-limiting:
+  # Enable rate limiting
+  enabled: true
+  
+  # Cooldown period in seconds
+  cooldown-seconds: 10
+  
+  # Maximum item give actions per cooldown period
+  max-actions: 20
+  
+  # Bypass permission (players with this can bypass rate limits)
+  bypass-permission: 'emijeipb.bypass-ratelimit'
+
+# Protocol settings for EMI/JEI communication
+protocol:
+  # Enable custom plugin messaging channels
+  enable-plugin-channels: true
+  
+  # Supported client mod channels
+  channels:
+    emi: 'emi:main'
+    jei: 'jei:main'
+    
+# Logging settings
+logging:
+  # Log item give actions
+  log-item-gives: true
+  
+  # Log protocol messages
+  log-protocol-messages: false
+  
+  # Log rate limit violations
+  log-rate-limits: true
+
+# Item restrictions
+restrictions:
+  # List of items that cannot be given via cheat mode
+  # Use Minecraft namespaced IDs (e.g., minecraft:bedrock)
+  blacklisted-items:
+    - 'minecraft:barrier'
+    - 'minecraft:command_block'
+    - 'minecraft:structure_block'
+    - 'minecraft:structure_void'
+    - 'minecraft:jigsaw'
+  
+  # List of items that can only be given by specific permission
+  # Format: 'item:id': 'permission.node'
+  restricted-items:
+    'minecraft:bedrock': 'emijeipb.give.bedrock'
+    'minecraft:command_block_minecart': 'emijeipb.give.commandblock'
